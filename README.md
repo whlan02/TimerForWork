@@ -1,4 +1,4 @@
-## Time Recorder
+## TimerForWork
 
 Lightweight, local desktop app to track working time with manual Start/Pause/Resume/Save, in-app Month/Week views, and Excel storage.
 
