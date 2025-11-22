@@ -1,14 +1,11 @@
-## Time Recorder
+## TimerForWork
 
-Lightweight, local desktop app to track working time with manual Start/Pause/Resume/Save, in-app Month/Week views, and Excel storage.
+Lightweight, local desktop app to track working time with manual Start/Pause/Resume/Save, in-app Month/Week views, and Excel storage. It helps you log focused work intervals manually. It stores entries in a local Excel file and visualizes your time on a calendar and week view. No cloud, no background tracking—fully under your control.
+
 
 ## Table of Contents
-- [Introduction](#introduction)
 - [Features](#features)
 - [How to Run](#how-to-run)
-
-## Introduction
-Time Recorder helps you log focused work intervals manually. It stores entries in a local Excel file and visualizes your time on a calendar and week view. No cloud, no background tracking—fully under your control.
 
 ## Features
 - Start / Pause / Resume / Save workflow
