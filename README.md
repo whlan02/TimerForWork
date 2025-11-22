@@ -1,6 +1,6 @@
 ## TimerForWork
 
-Lightweight, local desktop app to track working time with manual Start/Pause/Resume/Save, in-app Month/Week views, and Excel storage. It helps you log focused work intervals manually. It stores entries in a local Excel file and visualizes your time on a calendar and week view. No cloud, no background tracking—fully under your control.
+Lightweight, local desktop app to track working time with manual Start/Pause/Resume/Save, modern heatmap visualizations, and Excel storage. It helps you log focused work intervals manually. It stores entries in a local Excel file and visualizes your time with interactive week and month heatmaps. No cloud, no background tracking—fully under your control.
 
 
 ## Table of Contents
@@ -8,12 +8,18 @@ Lightweight, local desktop app to track working time with manual Start/Pause/Res
 - [How to Run](#how-to-run)
 
 ## Features
-- Start / Pause / Resume / Save workflow
-- Large digital Timer view with tenths (HH:MM:SS.t); saved durations use whole seconds
-- Month view with per-day coloring by total minutes
-- Week view (Mon–Sun) with daily cards, entries, and daily/weekly totals (minutes + HH:MM:SS)
-- Local Excel storage (`time_records.xlsx`), auto-created on first run
-- English UI and calendar locale
+- **Modern Timer Interface**: Clean, minimal design with Start/Pause/Resume/Save workflow
+- **Week View Heatmap**: Visualize daily work patterns across Morning (0-12), Afternoon (12-18), and Evening (18-24) periods
+  - Hover over blocks to see time details
+  - Click blocks or day labels to view detailed records
+  - Navigate between weeks with prev/next buttons
+- **Month View Heatmap**: Calendar-style overview of monthly work activity
+  - Hover over days to see daily totals
+  - Click any day to view all records for that date
+  - Navigate between months with prev/next buttons
+- **Record Details**: View start time, end time, duration, and notes for any time period
+- **Local Excel Storage**: All data saved to `time_records.xlsx`, auto-created on first run
+- **English UI**: English interface and calendar locale
 
 ## How to Run
 1) (Recommended) Create and activate a virtual environment
