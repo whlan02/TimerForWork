@@ -301,10 +301,10 @@ class StatsView(QWidget):
         self.layout.setContentsMargins(20, 20, 20, 20)
         self.layout.setSpacing(20)
 
-        # --- Top Bar (Controls | Stats) ---
+        # --- Top Bar (Timer | Stats) ---
         top_bar = QHBoxLayout()
         
-        self._btn_controls = QPushButton("Controls")
+        self._btn_controls = QPushButton("Timer")
         self._btn_controls.setObjectName("TabButtonInactive")
         self._btn_controls.setCursor(Qt.PointingHandCursor)
         self._btn_controls.clicked.connect(self.controls_requested.emit)
