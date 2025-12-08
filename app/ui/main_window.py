@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, time as dt_time
 from typing import Optional
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QDate, QTime
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -13,6 +13,10 @@ from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QTextEdit,
+    QFormLayout,
+    QDateEdit,
+    QTimeEdit,
+    QMessageBox,
 )
 
 from app.models.record import TimeRecord
@@ -39,6 +43,101 @@ class NoteDialog(QDialog):
     def get_text(self) -> Optional[str]:
         if self.exec() == QDialog.Accepted:
             return self._edit.toPlainText().strip()
+        return None
+
+
+class ManualRecordDialog(QDialog):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Manual Record")
+        self.resize(420, 320)
+
+        today = QDate.currentDate()
+        now_time_obj = QTime.currentTime()
+        now_time = QTime(now_time_obj.hour(), now_time_obj.minute(), 0)
+        default_end = now_time.addSecs(3600)  # +1h
+
+        self._date_edit = QDateEdit(today, self)
+        self._date_edit.setCalendarPopup(True)
+        self._date_edit.setDisplayFormat("yyyy-MM-dd")
+
+        self._start_edit = QTimeEdit(now_time, self)
+        self._start_edit.setDisplayFormat("HH:mm:ss")
+
+        self._end_edit = QTimeEdit(default_end, self)
+        self._end_edit.setDisplayFormat("HH:mm:ss")
+
+        self._duration_edit = QTimeEdit(QTime(1, 0, 0), self)
+        self._duration_edit.setDisplayFormat("HH:mm:ss")
+
+        self._note_edit = QTextEdit(self)
+
+        self._msg_label = QLabel("", self)
+        self._msg_label.setStyleSheet("color: #b91c1c;")
+
+        form = QFormLayout()
+        form.addRow("Date", self._date_edit)
+        form.addRow("Start", self._start_edit)
+        form.addRow("End", self._end_edit)
+        form.addRow("Duration", self._duration_edit)
+        form.addRow("Note", self._note_edit)
+
+        self._buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self)
+        self._buttons.accepted.connect(self._on_accept)
+        self._buttons.rejected.connect(self.reject)
+
+        layout = QVBoxLayout(self)
+        layout.addLayout(form)
+        layout.addWidget(self._msg_label)
+        layout.addWidget(self._buttons)
+        self.setLayout(layout)
+
+        self._start_edit.timeChanged.connect(self._update_duration_from_times)
+        self._end_edit.timeChanged.connect(self._update_duration_from_times)
+
+    def _update_duration_from_times(self) -> None:
+        start = self._start_edit.time()
+        end = self._end_edit.time()
+        start_sec = start.hour() * 3600 + start.minute() * 60 + start.second()
+        end_sec = end.hour() * 3600 + end.minute() * 60 + end.second()
+        diff = max(end_sec - start_sec, 0)
+        h = diff // 3600
+        m = (diff % 3600) // 60
+        s = diff % 60
+        self._duration_edit.setTime(QTime(h % 24, m, s))
+        if diff <= 0:
+            self._msg_label.setText("End time must be after start time.")
+        else:
+            self._msg_label.setText("")
+
+    def _on_accept(self) -> None:
+        record = self._build_record()
+        if record is None:
+            QMessageBox.warning(self, "Invalid time", "Please ensure end time is after start time.")
+            return
+        self._result_record = record
+        self.accept()
+
+    def _build_record(self) -> Optional[TimeRecord]:
+        start = self._start_edit.time()
+        end = self._end_edit.time()
+        start_sec = start.hour() * 3600 + start.minute() * 60 + start.second()
+        end_sec = end.hour() * 3600 + end.minute() * 60 + end.second()
+        diff = end_sec - start_sec
+        if diff <= 0:
+            return None
+        d = self._date_edit.date().toPython()
+        st = dt_time(start.hour(), start.minute(), start.second())
+        et = dt_time(end.hour(), end.minute(), end.second())
+        duration_sec = diff
+        duration_min = int(round(duration_sec / 60.0))
+        note = self._note_edit.toPlainText().strip()
+        return TimeRecord(date=d, start_time=st, end_time=et, duration_min=duration_min, duration_sec=duration_sec, note=note)
+
+    def get_record(self) -> Optional[TimeRecord]:
+        self._result_record: Optional[TimeRecord] = None
+        if self.exec() == QDialog.Accepted:
+            return getattr(self, "_result_record", None)
         return None
 
 
@@ -85,6 +184,7 @@ class MainWindow(QMainWindow):
         self._timer_view.pause_requested.connect(self._on_pause_clicked)
         self._timer_view.stop_requested.connect(self._on_record_clicked)
         self._timer_view.stats_requested.connect(self._show_stats_view)
+        self._timer_view.manual_requested.connect(self._on_manual_record)
         
         # Stats View Events
         self._stats_view.controls_requested.connect(self._show_timer_view)
@@ -143,6 +243,16 @@ class MainWindow(QMainWindow):
         
         # If we were in timer view, reset
         self._timer_view.update_time("00:00:00")
+
+    def _on_manual_record(self) -> None:
+        dlg = ManualRecordDialog(self)
+        record = dlg.get_record()
+        if record is None:
+            return
+        self._store.add_record(record)
+        if self._stack.currentWidget() is self._stats_view:
+            self._stats_view.refresh()
+        self.statusBar().showMessage(f"Manually recorded {record.duration_min} min", 3000)
 
     def _on_pause_clicked(self) -> None:
         if self._timer.is_running():

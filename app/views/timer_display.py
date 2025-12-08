@@ -17,6 +17,7 @@ class TimerDisplay(QWidget):
     pause_requested = Signal()
     stop_requested = Signal()
     stats_requested = Signal()
+    manual_requested = Signal()
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -91,6 +92,11 @@ class TimerDisplay(QWidget):
         self._stop_btn.clicked.connect(self.stop_requested.emit)
         self._stop_btn.setVisible(False)
 
+        self._manual_btn = QPushButton("Add Manual")
+        self._manual_btn.setObjectName("ManualButton")
+        self._manual_btn.setCursor(Qt.PointingHandCursor)
+        self._manual_btn.clicked.connect(self.manual_requested.emit)
+
         # Container to center the button and limit width
         btn_container = QVBoxLayout()
         btn_container.setAlignment(Qt.AlignCenter)
@@ -98,6 +104,7 @@ class TimerDisplay(QWidget):
         self._action_btn.setMinimumWidth(200)
         btn_container.addWidget(self._action_btn)
         btn_container.addWidget(self._stop_btn)
+        btn_container.addWidget(self._manual_btn)
         
         self.layout.addLayout(btn_container)
 
@@ -140,18 +147,21 @@ class TimerDisplay(QWidget):
             self._action_btn.setText("Pause")
             self._time_label.setStyleSheet("color: #111111;")
             self._stop_btn.setVisible(True)
+            self._manual_btn.setVisible(False)
         elif is_paused:
             self._status_label.setText("Paused")
             self._status_label.setStyleSheet("color: #b45309;") # Amber-ish text
             self._action_btn.setText("Resume")
             self._time_label.setStyleSheet("color: #6b7280;")
             self._stop_btn.setVisible(True)
+            self._manual_btn.setVisible(False)
         else:
             self._status_label.setText("Ready to Flow")
             self._status_label.setStyleSheet("color: #16a34a;")
             self._action_btn.setText("Start")
             self._time_label.setStyleSheet("color: #111111;")
             self._stop_btn.setVisible(False)
+            self._manual_btn.setVisible(True)
 
     def _apply_styles(self):
         # Light theme colors
@@ -237,5 +247,18 @@ class TimerDisplay(QWidget):
             QPushButton#StopButton:hover {{
                 color: #b91c1c;
                 text-decoration: underline;
+            }}
+            QPushButton#ManualButton {{
+                background-color: #e5e7eb;
+                color: #111111;
+                border: none;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                padding: 8px 12px;
+                margin-top: 6px;
+            }}
+            QPushButton#ManualButton:hover {{
+                background-color: #d1d5db;
             }}
         """)
